@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zoom VideoSDK Quickstart</title>
+</head>
+
+<body class="flex flex-1 flex-col h-full min-h-screen relative">
+  <h1 class="text-3xl font-bold text-center my-4">Zoom VideoSDK Quickstart</h1>
+  <div class="flex flex-row self-center">
+    <button id="start-btn" class="bg-blue-500 text-white font-bold py-2 px-4 rounded mb-4 w-64 self-center">
+      Join
+    </button>
+    <div class="flex flex-row self-center">
+    <button id="ai-btn" class="bg-blue-500 text-white font-bold py-2 px-4 rounded mb-4 w-64 self-center">
+      Launch AI
+    </button>
+    <button id="run-btn" class="bg-blue-500 text-white font-bold py-2 px-4 rounded mb-4 w-64 self-center">
+      Run AI
+    </button>
+  </div>
+
+
+
+    <button id="stop-btn" class="hidden bg-blue-500 text-white font-bold py-2 px-4 rounded mb-4 w-64 self-center">
+      Leave
+    </button>
+  </div>
+  <div class="flex flex-row self-center m-2">
+    <button id="toggle-video-btn" class="hidden bg-blue-500 text-white py-2 text-sm px-2 rounded w-48 self-center">
+      Toggle Video
+    </button>
+  </div>
+
+
+  <video-player-container></video-player-container>
+  <div class="text-center absolute bottom-2 w-full">
+    Do not expose your SDK Secret to the client, when using this in production
+    please make sure to use a backend service to sign tokens.
+  </div>
+  <script src="/coi-serviceworker.js"></script>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+
+</html>
