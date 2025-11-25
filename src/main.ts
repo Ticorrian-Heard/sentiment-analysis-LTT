@@ -118,6 +118,7 @@ toggleVideoBtn.addEventListener("click", async () => {
 
 aiBtn.addEventListener("click", async () => {
     launchAI();
+    aiBtn.disabled = true;
 });
 
 runBtn.addEventListener("click", () => {
@@ -126,7 +127,7 @@ runBtn.addEventListener("click", () => {
     alert("click 'Launch AI' to initialize Model first");
     return;
    }
-   
+
    const allWords = localStorage.getItem("allWords");
    const wordReference = localStorage.getItem("wordReference");
 
