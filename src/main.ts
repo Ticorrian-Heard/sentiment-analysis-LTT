@@ -13,6 +13,8 @@ const username = `User-${String(new Date().getTime()).slice(6)}`;
 const client = ZoomVideo.createClient();
 await client.init("en-US", "Global", { patchJsMedia: true });
 
+var isMuted: boolean | null = null;
+
 var myWebWorker: any = null;
 
 const startCall = async () => {
@@ -22,18 +24,42 @@ const startCall = async () => {
     client.on("peer-video-state-change", renderVideo);
     await client.join(topic, token, username);
     const mediaStream = client.getMediaStream();
-    await mediaStream.startAudio();
+    await mediaStream.startAudio({mute: false});
     await mediaStream.startVideo();
 
+    const channel1 = new MessageChannel();
+    // const channel2 = new MessageChannel();
+
     const processor = await mediaStream.createProcessor({
-        name: "audio-sentiment-processor",
+        name: "vsdk-audio-processor",
         type: "audio",
-        url: window.location.origin + "/audio-sentiment.js",
+        url: window.location.origin + "/audio-processor.js",
+        options: {
+            bufferSize: 4096,  // Adjust based on requirements
+            sampleRate: 16000  // Optimize for speech recognition
+        }
     });
     // Add a processor
     await mediaStream.addProcessor(processor);
+    // Add second web web worker
+    const speechToTextWorker = new Worker(window.location.origin + "/speechtotext-worker.js");
+
+    processor.port.postMessage({
+        event: 'init',
+        payload: {
+            port: channel1.port1
+        }
+    }, [channel1.port1]);
+
+    speechToTextWorker.postMessage({
+        event: 'init',
+        payload: {
+            port: channel1.port2
+        }
+    }, [channel1.port2]);
+
     // render the video of the current user
-    // await renderVideo({ action: 'Start', userId: client.getCurrentUserInfo().userId });
+    await renderVideo({ action: 'Start', userId: client.getCurrentUserInfo().userId });
 };
 
 const renderVideo = async (event: { action: "Start" | "Stop"; userId: number; }) => {
@@ -48,11 +74,11 @@ const renderVideo = async (event: { action: "Start" | "Stop"; userId: number; })
 };
 
 const leaveCall = async () => {
-    // const mediaStream = client.getMediaStream();
-    // for (const user of client.getAllUser()) {
-    //     const element = await mediaStream.detachVideo(user.userId);
-    //     Array.isArray(element) ? element.forEach((el) => el.remove()) : element.remove();
-    // }
+    const mediaStream = client.getMediaStream();
+    for (const user of client.getAllUser()) {
+        const element = await mediaStream.detachVideo(user.userId);
+        Array.isArray(element) ? element.forEach((el) => el.remove()) : element.remove();
+    }
     client.off("peer-video-state-change", renderVideo);
     await client.leave();
 }
@@ -68,6 +94,14 @@ const toggleVideo = async () => {
         // update the canvas when the video is started
         await renderVideo({ action: 'Start', userId: client.getCurrentUserInfo().userId });
     }
+};
+
+const toggleAudio = async () => {
+    const mediaStream = client.getMediaStream();
+    (client.getCurrentUserInfo().muted) ? await mediaStream.unmuteAudio() : await mediaStream.muteAudio();
+    const curr = client.getCurrentUserInfo();
+    if (curr.muted) muteBtn.innerHTML = "Unmute";
+    else muteBtn.innerHTML = "Mute";
 };
 
 const launchAI = async () => {
@@ -86,6 +120,8 @@ const startBtn = document.querySelector("#start-btn") as HTMLButtonElement;
 const stopBtn = document.querySelector("#stop-btn") as HTMLButtonElement;
 const toggleVideoBtn = document.querySelector("#toggle-video-btn") as HTMLButtonElement;
 
+const muteBtn =  document.querySelector("#mute-btn") as HTMLButtonElement;
+
 const aiBtn = document.querySelector("#ai-btn") as HTMLButtonElement;
 const runBtn = document.querySelector("#run-btn") as HTMLButtonElement;
 
@@ -101,10 +137,12 @@ startBtn.addEventListener("click", async () => {
     startBtn.style.display = "none";
     stopBtn.style.display = "block";
     toggleVideoBtn.style.display = "block";
+    muteBtn.style.display = "block";
 });
 
 stopBtn.addEventListener("click", async () => {
     toggleVideoBtn.style.display = "none";
+    muteBtn.style.display = "none";
     await leaveCall();
     stopBtn.style.display = "none";
     startBtn.style.display = "block";
@@ -114,6 +152,10 @@ stopBtn.addEventListener("click", async () => {
 
 toggleVideoBtn.addEventListener("click", async () => {
     await toggleVideo();
+});
+
+muteBtn.addEventListener("click", async () => {
+    await toggleAudio();
 });
 
 aiBtn.addEventListener("click", async () => {
