@@ -1,33 +1,29 @@
-# Zoom Video SDK Web Hello World Sample
+# Video SDK Web Media Processor - Closed Captions
 
 Use of this sample app is subject to our [Terms of Use](https://explore.zoom.us/en/video-sdk-terms/).
 
-The [Zoom Video SDK for web](https://developers.zoom.us/docs/video-sdk/web/) enables you to build custom video experiences on a webpage with Zoom's core technology.
-
-
-You can find the corresponding Developer Blog for this app [here](https://developers.zoom.us/blog/content-moderator-with-videosdk-web-processor/)
-
+The [Zoom Video SDK for web](https://developers.zoom.us/docs/video-sdk/web/) enables you to build custom video experiences on a webpage with Zoom's core technology. This demo showcases how to use a [media processor](https://developers.zoom.us/docs/video-sdk/web/raw-data) to display closed captions on user video and screenshare. It uses the Video SDK [Live transcription](https://developers.zoom.us/docs/video-sdk/web/transcription-translation/) feature.
 
 ## Installation
 
 To get started, clone the repo:
 
-`git clone https://github.com/zoom/videosdk-web-helloworld.git`
+`git clone https://github.com/zoom/videosdk-web-mediaprocessor-closedcaptions`
 
 ## Setup
 
 1. Install the dependencies:
 
-   `npm install`
+   `bun install # or npm install`
 
-1. Create a `.env` file in the root directory of the project, you can do this by copying the `.env.example` file (`cp .env.example .env`) and replacing the values with your own. The `.env` file should look like this:
+1. Create a `.env` file in the root directory of the project, you can do this by copying the `.env.example` file (`cp .env.example .env`) and replacing the values with your own. The `.env` file should look like this, with your own Zoom Video SDK key and secret:
 
    ```
    VITE_SDK_KEY=abc123XXXXXXXXXX
    VITE_SDK_SECRET=abc123XXXXXXXXXX
    ```
 
-   Replace `YourZoomVideoSDKKey` and `YourZoomVideoSDKSecret` with your Zoom Video SDK key and secret.
+   Add your Zoom Video SDK key and secret to the `.env` file.
 
 1. Run the app:
 
@@ -39,7 +35,7 @@ To get started, clone the repo:
 
 1. Click "Join" to join the session
 
-> Learn more about [rendering multiple video streams](https://developers.zoom.us/docs/video-sdk/web/gallery-view/)
+1. As you speak, you'll see closed captions displayed on your video and screenshare.
 
 For the full list of features and event listeners, as well as additional guides, see our [Video SDK docs](https://developers.zoom.us/docs/video-sdk/web/).
 

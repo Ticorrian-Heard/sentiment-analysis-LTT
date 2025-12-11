@@ -16,12 +16,11 @@
     "vite": "^5.1.6"
   },
   "dependencies": {
-    "@tensorflow-models/coco-ssd": "^2.2.3",
-    "@tensorflow/tfjs-backend-cpu": "^4.22.0",
-    "@tensorflow/tfjs-backend-webgl": "^4.22.0",
-    "@tensorflow/tfjs-core": "^4.22.0",
+    "@tensorflow/tfjs": "^4.22.0",
     "@types/jsrsasign": "^10.5.13",
     "@zoom/videosdk": "^2.3.5",
+    "fabric": "^6.7.1",
+    "glob": "^11.0.3",
     "jsrsasign": "^11.1.0"
   }
 }

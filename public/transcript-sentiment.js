@@ -32,7 +32,6 @@ const emotions = [
             "remorse",
             "sadness",
             "surprise",
-            "neutral"
         ];
 
 function shuffleArray( array ) {
@@ -42,14 +41,14 @@ function shuffleArray( array ) {
     }
 }
 
-self.onmessage = (e) => {
+self.onmessage = async (e) => {
     const {event, payload} = e.data;
     switch(event) {
     case "run-detection": 
         runDetection(JSON.parse(payload.allWords), JSON.parse(payload.wordReference), payload.transcript);
         break;
     case "train-model":
-        trainModel();
+        trainModel(payload.sampleSize, payload.epochs);
         break;
     }
 }
@@ -57,9 +56,9 @@ self.onmessage = (e) => {
 const runDetection = async (allWords, wordReference, transcript) => {
   try {
     if (model) {
-        let sentence = transcript
+       let sentence = transcript;
 
-        console.log("running detection on sentence:", sentence);
+       console.log(`Running detection on transcript text: ${sentence}`);
 
         let vector = new Array( allWords.length ).fill( 0 );
         let words = sentence.replace(/[^a-z ]/gi, "").toLowerCase().split( " " ).filter( x => !!x );
@@ -72,7 +71,13 @@ const runDetection = async (allWords, wordReference, transcript) => {
 
         let prediction = await model.predict( tf.stack( [ tf.tensor1d( vector ) ] ) ).data();
         let id = prediction.indexOf( Math.max( ...prediction ) );
-        console.log( `Result: ${emotions[ id ]}` );
+        let result = emotions[ id ];
+        console.log( `Result: ${result}` );
+
+        self.postMessage({
+            event: "sentiment-result",
+            payload: { result }
+        });
         return;
     }
     else {
@@ -84,7 +89,7 @@ const runDetection = async (allWords, wordReference, transcript) => {
   }
 };
 
-const trainModel = async () => {
+const trainModel = async (sampleSize, epochs) => {
     console.log(`Please wait. Training the model...`);
 
     //train and save model to browser indexeddb
@@ -96,7 +101,7 @@ const trainModel = async () => {
     shuffleArray( lines );
 
     // Process 200 lines to generate a "bag of words"
-    const numSamples = 200;
+    const numSamples = sampleSize;
     let bagOfWords = {};
     let allWords = [];
     let wordReference = {};
@@ -111,7 +116,7 @@ const trainModel = async () => {
             if( !bagOfWords[ w ] ) {
                 bagOfWords[ w ] = 0;
             }
-            bagOfWords[ w ]++; // Counting occurrence just for word frequency fun
+            bagOfWords[ w ]++;
         });
     });
 
@@ -142,7 +147,6 @@ const trainModel = async () => {
         return output;
     });
 
-    // Define our model with several hidden layers
     model = tf.sequential();
     model.add(tf.layers.dense( { units: 100, activation: "relu", inputShape: [ allWords.length ] } ) );
     model.add(tf.layers.dense( { units: 50, activation: "relu" } ) );
@@ -150,7 +154,7 @@ const trainModel = async () => {
     model.add(tf.layers.dense( {
         units: emotions.length,
         activation: "softmax"
-    } ) );
+    }));
 
     model.compile({
         optimizer: tf.train.adam(),
@@ -161,7 +165,7 @@ const trainModel = async () => {
     const xs = tf.stack( vectors.map( x => tf.tensor1d( x ) ) );
     const ys = tf.stack( outputs.map( x => tf.tensor1d( x ) ) );
     await model.fit( xs, ys, {
-        epochs: 50,
+        epochs: epochs,
         shuffle: true,
         callbacks: {
             onEpochEnd: ( epoch, logs ) => {
