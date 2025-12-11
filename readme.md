@@ -1,4 +1,4 @@
-# Video SDK Web Media Processor - Closed Captions
+# Video SDK Web - Sentiment Analysis
 
 Use of this sample app is subject to our [Terms of Use](https://explore.zoom.us/en/video-sdk-terms/).
 
@@ -8,7 +8,7 @@ The [Zoom Video SDK for web](https://developers.zoom.us/docs/video-sdk/web/) ena
 
 To get started, clone the repo:
 
-`git clone https://github.com/zoom/videosdk-web-mediaprocessor-closedcaptions`
+`git clone https://github.com/zoom/videosdk-sentiment-analysis-sample.git`
 
 ## Setup
 
