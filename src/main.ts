@@ -7,16 +7,12 @@ import * as tf from '@tensorflow/tfjs';
 const sdkKey = import.meta.env.VITE_SDK_KEY as string;
 const sdkSecret = import.meta.env.VITE_SDK_SECRET as string;
 
-const myShareEle = document.querySelector('#my-screen-share-content-video')! as HTMLVideoElement;
-const myShareCanvas = document.querySelector('#my-screen-share-content-canvas')! as HTMLCanvasElement;
-const shareCanvas = document.querySelector('#users-screen-share-content-canvas')! as HTMLCanvasElement;
 const videoContainer = document.querySelector('video-player-container') as HTMLElement;
 const sessionName = "TestOne";
 const role = 1;
 const username = `User-${String(new Date().getTime()).slice(6)}`;
 
 let videoprocessor: Processor;
-let shareprocessor: Processor;
 var sentimentWorker: any = null;
 var processingPaused = false;
 
@@ -26,28 +22,13 @@ await client.init("en-US", "Global", { patchJsMedia: false, });
 const startCall = async () => {
     const token = generateSignature(sessionName, role, sdkKey, sdkSecret);
     client.on("peer-video-state-change", renderVideo);
-    client.on('active-share-change', (payload) => {
-        if (payload.state === 'Active') {
-            shareCanvas.style.display = 'block';
-            mediaStream.startShareView(shareCanvas, payload.userId)
-        } else if (payload.state === 'Inactive') {
-            shareCanvas.style.display = 'none';
-            mediaStream.stopShareView()
-        }
-    })
+
     await client.join(sessionName, token, username);
     const mediaStream = client.getMediaStream();
     if (!mediaStream.isSupportVideoProcessor()) alert("Your browser does not support video processor");
-    if (!mediaStream.isSupportShareProcessor()) alert("Your browser does not support share processor");
     await mediaStream.startAudio();
     await mediaStream.startVideo();
-
-    client.getAllUser().forEach((user) => {
-        if (user.sharerOn) {
-            shareCanvas.style.display = 'block';
-            mediaStream.startShareView(shareCanvas, user.userId)
-        }
-    })
+    
     // render the video of the current user
     await renderVideo({ action: 'Start', userId: client.getCurrentUserInfo().userId });
 
@@ -58,13 +39,6 @@ const startCall = async () => {
     });
     await mediaStream.addProcessor(videoprocessor);
 
-    shareprocessor = await mediaStream.createProcessor({
-        name: "caption",
-        type: "share",
-        url: window.location.origin + "/caption-screen.js",
-        options: { needFixedCaptureRate: true, }
-    });
-
     client.on("caption-message", async (payload) => {
         if (payload.done && !processingPaused) runSentiment(payload.text);
 
@@ -72,13 +46,7 @@ const startCall = async () => {
             const { width, height } = mediaStream.getCapturedVideoResolution();
             const videoImageBitmap = await getBitmap(payload.text, width, height);
             videoprocessor.port.postMessage({ cmd: 'caption', image: videoImageBitmap })
-
-            const shareStreamSettings = mediaStream.getShareStreamSettings();
-            if (!shareStreamSettings) return;
-            if (!shareStreamSettings.width || !shareStreamSettings.height) return;
-            const imageBitmap = await getBitmap(payload.text, shareStreamSettings.width, shareStreamSettings.height); // create a bitmap image from text
-            shareprocessor.port.postMessage({ cmd: 'caption', image: imageBitmap });
-        }
+            }
     });
     const liveTranscriptionTranslation = client.getLiveTranscriptionClient();
     await liveTranscriptionTranslation.startLiveTranscription();
@@ -100,33 +68,8 @@ const renderVideo: typeof event_peer_video_state_change = async (event) => {
     }
 };
 
-const startShare = async () => {
-    const mediaStream = client.getMediaStream();
-    client.on('passively-stop-share', handlePassiveStop)
-    if (mediaStream.isStartShareScreenWithVideoElement()) {
-        await mediaStream.startShareScreen(myShareEle, { captureHeight: 720, captureWidth: 1280, displaySurface: "monitor" })
-        myShareEle.style.display = 'block';
-    } else {
-        console.log("can't use video element")
-        await mediaStream.startShareScreen(myShareCanvas, { captureHeight: 720, captureWidth: 1280, displaySurface: "monitor" })
-        myShareCanvas.style.display = 'block';
-    }
-    await mediaStream.addProcessor(shareprocessor);
-}
-
-const handlePassiveStop = () => {
-    myShareEle.style.display = 'none';
-    myShareCanvas.style.display = 'none';
-    shareCanvas.style.display = 'none';
-    const mediaStream = client.getMediaStream();
-    mediaStream.removeProcessor(shareprocessor);
-    client.off('passively-stop-share', handlePassiveStop)
-}
-
 const leaveCall = async () => {
     const mediaStream = client.getMediaStream();
-    await mediaStream.stopShareView().catch(e => console.log(e));
-    await mediaStream.removeProcessor(shareprocessor).catch(e => console.log(e));
     await mediaStream.removeProcessor(videoprocessor).catch(e => console.log(e));
     for (const user of client.getAllUser()) {
         const element = await mediaStream.detachVideo(user.userId);
@@ -135,9 +78,6 @@ const leaveCall = async () => {
         else if (element) element.remove();
     }
     client.off("peer-video-state-change", renderVideo);
-    myShareEle.style.display = 'none';
-    myShareCanvas.style.display = 'none';
-    shareCanvas.style.display = 'none';
     await client.leave();
 }
 
@@ -186,7 +126,6 @@ const runSentiment = (transcript: any) => {
 // UI Logic
 const startBtn = document.querySelector("#start-btn") as HTMLButtonElement;
 const stopBtn = document.querySelector("#stop-btn") as HTMLButtonElement;
-const shareBtn = document.querySelector("#share-btn") as HTMLButtonElement;
 const aiform = document.querySelector("#ai-form") as HTMLDivElement;
 const aiBtn = document.querySelector("#ai-btn") as HTMLButtonElement;
 const sampleSize = document.getElementById('sample-size') as HTMLInputElement; 
@@ -215,8 +154,6 @@ startBtn.addEventListener("click", async () => {
         epochsOutput.innerHTML = `Epochs: ${epochs.value}`;
     };
 });
-
-shareBtn.addEventListener("click", startShare);
 
 stopBtn.addEventListener("click", async () => {
     await leaveCall();

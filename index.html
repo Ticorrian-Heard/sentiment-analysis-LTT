@@ -28,9 +28,6 @@
         <button id="ai-btn" class="bg-blue-500 text-white font-bold py-2 px-4 rounded mb-4 w-64 hover:bg-blue-600 active:bg-blue-700 self-center">
          Reset AI 
         </button>
-        <button id="share-btn" class="bg-blue-500 text-white font-bold py-2 px-4 rounded mb-4 w-64 hover:bg-blue-600 active:bg-blue-700 self-center">
-          Share Screen
-        </button>
         <button id="stop-btn" class="bg-blue-500 text-white font-bold py-2 px-4 rounded mb-4 w-64 hover:bg-blue-600 active:bg-blue-700 self-center">
           Leave
         </button>
@@ -41,12 +38,6 @@
      </div>
   </div>
 
-  <video class="flex flex-row self-center m-2 h-96 hidden max-w-[65rem] max-h-[65rem]"
-    id="my-screen-share-content-video" height="1080" width="1920"></video>
-  <canvas class="flex flex-row self-center m-2 h-96 hidden max-w-[65rem] max-h-[65rem]"
-    id="my-screen-share-content-canvas" height="1080" width="1920"></canvas>
-  <canvas class="flex flex-row self-center m-2 h-96 hidden max-w-[65rem] max-h-[65rem]"
-    id="users-screen-share-content-canvas" height="1080" width="1920"></canvas>
   <video-player-container class="max-w-[65rem] max-h-[65rem]"></video-player-container>
   <div class="text-center absolute bottom-2 w-full">
     Do not expose your SDK Secret to the client, when using this in production
