@@ -5,25 +5,23 @@ Use of this sample app is subject to our [Terms of Use](https://explore.zoom.us/
 The [Zoom Video SDK for web](https://developers.zoom.us/docs/video-sdk/web/) enables you to build custom video experiences on a webpage with Zoom's core technology. This demo showcases how to use a [media processor](https://developers.zoom.us/docs/video-sdk/web/raw-data) to display closed captions on user video and screenshare. It uses the Video SDK [Live transcription](https://developers.zoom.us/docs/video-sdk/web/transcription-translation/) feature.
 
 ## Installation
-
 To get started, clone the repo:
 
 `git clone https://github.com/zoom/videosdk-sentiment-analysis-sample.git`
 
-## Setup
+## JWT Helper
 
-1. Install the dependencies:
+The project provides a `generateToken.ts` file that can be used to generate a temporary JWT:
+1. Create a `.env` file in the root directory of the project, you can do this by copying the `.env.example` file (`cp .env.example .env`) and replacing the values with your own. The `.env` file should look like this:
 
-   `bun install # or npm install`
+```
+SDK_KEY=abc123XXXXXXXXXX
+SDK_SECRET=abc123XXXXXXXXXX
+```
 
-1. Create a `.env` file in the root directory of the project, you can do this by copying the `.env.example` file (`cp .env.example .env`) and replacing the values with your own. The `.env` file should look like this, with your own Zoom Video SDK key and secret:
+2. Run `bun generateToken.ts TestOne --copy-to-clipboard`
 
-   ```
-   VITE_SDK_KEY=abc123XXXXXXXXXX
-   VITE_SDK_SECRET=abc123XXXXXXXXXX
-   ```
-
-   Add your Zoom Video SDK key and secret to the `.env` file.
+The script generates a token for the proivded session name and the `--copy-to-clipboard` or `-c` flag copies it to your clipboard.
 
 1. Run the app:
 

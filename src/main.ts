@@ -1,15 +1,10 @@
 import ZoomVideo, { event_peer_video_state_change, LiveTranscriptionLanguage, Processor, VideoPlayer, VideoQuality } from "@zoom/videosdk";
-import { generateSignature, getBitmap } from "./utils";
+import { getBitmap } from "./utils";
 import "./style.css";
 import * as tf from '@tensorflow/tfjs';
 
-// You should sign your JWT with a backend service in a production use-case
-const sdkKey = import.meta.env.VITE_SDK_KEY as string;
-const sdkSecret = import.meta.env.VITE_SDK_SECRET as string;
-
 const videoContainer = document.querySelector('video-player-container') as HTMLElement;
 const sessionName = "TestOne";
-const role = 1;
 const username = `User-${String(new Date().getTime()).slice(6)}`;
 
 let videoprocessor: Processor;
@@ -19,40 +14,71 @@ var processingPaused = false;
 const client = ZoomVideo.createClient();
 await client.init("en-US", "Global", { patchJsMedia: false, });
 
+// UI Logic
+const startBtn = document.querySelector("#start-btn") as HTMLButtonElement;
+const stopBtn = document.querySelector("#stop-btn") as HTMLButtonElement;
+const aiform = document.querySelector("#ai-form") as HTMLDivElement;
+const aiBtn = document.querySelector("#ai-btn") as HTMLButtonElement;
+const sampleSize = document.getElementById('sample-size') as HTMLInputElement; 
+const epochs = document.getElementById('epochs') as HTMLInputElement;
+const sampleSizeOutput = document.getElementById('sample-size-output') as HTMLElement; 
+const epochsOutput = document.getElementById('epochs-output') as HTMLElement;
+const sentimentOutput = document.getElementById('sentiment') as HTMLElement;
+
+
 const startCall = async () => {
-    const token = generateSignature(sessionName, role, sdkKey, sdkSecret);
+
+    const token: string | null = prompt("Please enter your JWT Token:");
+
     client.on("peer-video-state-change", renderVideo);
 
-    await client.join(sessionName, token, username);
-    const mediaStream = client.getMediaStream();
-    if (!mediaStream.isSupportVideoProcessor()) alert("Your browser does not support video processor");
-    await mediaStream.startAudio();
-    await mediaStream.startVideo();
-    
-    // render the video of the current user
-    await renderVideo({ action: 'Start', userId: client.getCurrentUserInfo().userId });
+    if (token) {
+        await client.join(sessionName, token, username);
+        const mediaStream = client.getMediaStream();
+        if (!mediaStream.isSupportVideoProcessor()) alert("Your browser does not support video processor");
+        await mediaStream.startAudio();
+        await mediaStream.startVideo();
+        
+        // render the video of the current user
+        await renderVideo({ action: 'Start', userId: client.getCurrentUserInfo().userId });
 
-    videoprocessor = await mediaStream.createProcessor({
-        name: "caption",
-        type: "video",
-        url: window.location.origin + "/caption-video.js",
-    });
-    await mediaStream.addProcessor(videoprocessor);
+        videoprocessor = await mediaStream.createProcessor({
+            name: "caption",
+            type: "video",
+            url: window.location.origin + "/caption-video.js",
+        });
+        await mediaStream.addProcessor(videoprocessor);
 
-    client.on("caption-message", async (payload) => {
-        if (payload.done && !processingPaused) runSentiment(payload.text);
+        client.on("caption-message", async (payload) => {
+            if (payload.done && !processingPaused) runSentiment(payload.text);
 
-        if (payload.userId === client.getCurrentUserInfo().userId) {
-            const { width, height } = mediaStream.getCapturedVideoResolution();
-            const videoImageBitmap = await getBitmap(payload.text, width, height);
-            videoprocessor.port.postMessage({ cmd: 'caption', image: videoImageBitmap })
-            }
-    });
-    const liveTranscriptionTranslation = client.getLiveTranscriptionClient();
-    await liveTranscriptionTranslation.startLiveTranscription();
-    liveTranscriptionTranslation.setSpeakingLanguage(LiveTranscriptionLanguage.English);
+            if (payload.userId === client.getCurrentUserInfo().userId) {
+                const { width, height } = mediaStream.getCapturedVideoResolution();
+                const videoImageBitmap = await getBitmap(payload.text, width, height);
+                videoprocessor.port.postMessage({ cmd: 'caption', image: videoImageBitmap })
+                }
+        });
+        const liveTranscriptionTranslation = client.getLiveTranscriptionClient();
+        await liveTranscriptionTranslation.startLiveTranscription();
+        liveTranscriptionTranslation.setSpeakingLanguage(LiveTranscriptionLanguage.English);
 
-    await launchAI();
+        await launchAI();
+
+        startBtn.innerHTML = "Connected";
+        startBtn.style.display = "none";
+        aiform.style.display = "flex";
+
+        sampleSize.oninput = () => {
+            sampleSizeOutput.innerHTML = `Training Sample Size: ${sampleSize.value}`;
+        };
+        epochs.oninput = () => {
+            epochsOutput.innerHTML = `Epochs: ${epochs.value}`;
+        };
+    } else {
+        alert("Token needed to join Session");
+        startBtn.innerHTML = "Join";
+        startBtn.disabled = false;
+    }
 };
 
 const renderVideo: typeof event_peer_video_state_change = async (event) => {
@@ -123,36 +149,11 @@ const runSentiment = (transcript: any) => {
     });
 };
 
-// UI Logic
-const startBtn = document.querySelector("#start-btn") as HTMLButtonElement;
-const stopBtn = document.querySelector("#stop-btn") as HTMLButtonElement;
-const aiform = document.querySelector("#ai-form") as HTMLDivElement;
-const aiBtn = document.querySelector("#ai-btn") as HTMLButtonElement;
-const sampleSize = document.getElementById('sample-size') as HTMLInputElement; 
-const epochs = document.getElementById('epochs') as HTMLInputElement;
-const sampleSizeOutput = document.getElementById('sample-size-output') as HTMLElement; 
-const epochsOutput = document.getElementById('epochs-output') as HTMLElement;
-const sentimentOutput = document.getElementById('sentiment') as HTMLElement;
-
-
 startBtn.addEventListener("click", async () => {
-    if (!sdkKey || !sdkSecret) {
-        alert("Please enter SDK Key and SDK Secret in the .env file");
-        return;
-    }
     startBtn.innerHTML = "Connecting...";
     startBtn.disabled = true;
     await startCall();
-    startBtn.innerHTML = "Connected";
-    startBtn.style.display = "none";
-    aiform.style.display = "flex";
-
-    sampleSize.oninput = () => {
-        sampleSizeOutput.innerHTML = `Training Sample Size: ${sampleSize.value}`;
-    };
-    epochs.oninput = () => {
-        epochsOutput.innerHTML = `Epochs: ${epochs.value}`;
-    };
+    
 });
 
 stopBtn.addEventListener("click", async () => {
