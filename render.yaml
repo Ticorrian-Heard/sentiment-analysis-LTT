@@ -4,7 +4,7 @@ services:
     runtime: node
     buildCommand: npm install
     startCommand: npm run start
-    repo:  https://github.com/zoom/videosdk-LTT-sentiment-analysis
+    repo:  https://github.com/Ticorrian-Heard/sentiment-analysis-LTT
     rootDir: .
     plan: free
     envVars:
