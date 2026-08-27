@@ -9,6 +9,13 @@ To get started, clone the repo:
 
 `git clone https://github.com/zoom/videosdk-sentiment-analysis-sample.git`
 
+
+## Quick Deploy
+
+| Render |
+|:-:|
+| [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/zoom/videosdk-LTT-sentiment-analysis)
+
 ## JWT Helper
 
 The project provides a `generateToken.ts` file that can be used to generate a temporary JWT:
