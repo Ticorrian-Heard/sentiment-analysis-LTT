@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: Zoom Sentiment Analysis with Live Transcription
+    runtime: node
+    buildCommand: npm install
+    startCommand: npm run start
+    repo:  https://github.com/zoom/videosdk-LTT-sentiment-analysis
+    rootDir: .
+    plan: free
+    envVars:
+      - key: ZOOM_SDK_KEY
+        sync: false
+      - key: ZOOM_SDK_SECRET
+        sync: false
+      - key: VITE_SERVER_PORT
+        sync: false
+      - key: VITE_ENDPOINT_URL
+        sync: false

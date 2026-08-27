@@ -15,8 +15,8 @@ The project provides a `generateToken.ts` file that can be used to generate a te
 1. Create a `.env` file in the root directory of the project, you can do this by copying the `.env.example` file (`cp .env.example .env`) and replacing the values with your own. The `.env` file should look like this:
 
 ```
-SDK_KEY=abc123XXXXXXXXXX
-SDK_SECRET=abc123XXXXXXXXXX
+ZOOM_SDK_KEY=abc123XXXXXXXXXX
+ZOOM_SDK_SECRET=abc123XXXXXXXXXX
 ```
 
 2. Run `bun generateToken.ts TestOne --copy-to-clipboard`

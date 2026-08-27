@@ -7,14 +7,14 @@ import { Command } from "commander";
 
 dotenv.config({ quiet: true });
 const program = new Command();
-const sdkKey = process.env.SDK_KEY;
-const sdkSecret = process.env.SDK_SECRET;
+const sdkKey = process.env.ZOOM_SDK_KEY;
+const sdkSecret = process.env.ZOOM_SDK_SECRET;
 
 function validateEnvironment(): void {
 	if (!sdkKey || !sdkSecret) {
 		console.error(
 			chalk.red.bold("✗ Error:") +
-			" SDK_KEY and SDK_SECRET must be set in your environment or .env file",
+			" ZOOM_SDK_KEY and ZOOM_SDK_SECRET must be set in your environment or .env file",
 		);
 		console.error(
 			chalk.dim("   Please ensure your .env file contains both variables."),
@@ -24,7 +24,7 @@ function validateEnvironment(): void {
 
 	if (sdkKey.trim() === "" || sdkSecret.trim() === "") {
 		console.error(
-			chalk.red.bold("✗ Error:") + " SDK_KEY and SDK_SECRET cannot be empty",
+			chalk.red.bold("✗ Error:") + " ZOOM_SDK_KEY and ZOOM_SDK_SECRET cannot be empty",
 		);
 		process.exit(1);
 	}

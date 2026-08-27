@@ -4,7 +4,7 @@ import "./style.css";
 import * as tf from '@tensorflow/tfjs';
 
 const videoContainer = document.querySelector('video-player-container') as HTMLElement;
-const sessionName = "TestOne";
+const sessionName = "TestSession";
 const username = `User-${String(new Date().getTime()).slice(6)}`;
 
 let videoprocessor: Processor;
@@ -28,7 +28,23 @@ const sentimentOutput = document.getElementById('sentiment') as HTMLElement;
 
 const startCall = async () => {
 
-    const token: string | null = prompt("Please enter your JWT Token:");
+    const endpointUrl = import.meta.env.VITE_ENDPOINT_URL;
+    const serverPort = import.meta.env.VITE_SERVER_PORT;
+    let token: string | null = null;
+
+    if (endpointUrl) {
+        try {
+            const response = await fetch(`${endpointUrl}:${serverPort}/zoomtoken?session=${encodeURIComponent(sessionName)}`);
+            if (!response.ok) throw new Error(`Request failed with status ${response.status}`);
+            const data = await response.json();
+            token = data.token ?? null;
+        } catch (error) {
+            console.error("Failed to retrieve token from server:", error);
+            alert("Failed to retrieve token from the token server. Please check the server and try again.");
+        }
+    } else {
+        token = prompt("Please enter your JWT Token:");
+    }
 
     client.on("peer-video-state-change", renderVideo);
 
