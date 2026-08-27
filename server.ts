@@ -2,15 +2,28 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import KJUR from "jsrsasign";
+import path from "path";
+import { fileURLToPath } from "url";
 
 dotenv.config({ quiet: true });
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const distDir = path.join(__dirname, "dist");
+
 const sdkKey = process.env.ZOOM_SDK_KEY;
 const sdkSecret = process.env.ZOOM_SDK_SECRET;
-const port = process.env.VITE_SERVER_PORT ? Number(process.env.VITE_SERVER_PORT) : 3000;
+// Render (and most hosts) inject PORT; fall back to the local dev var, then a default.
+const port = process.env.PORT
+	? Number(process.env.PORT)
+	: process.env.VITE_SERVER_PORT
+		? Number(process.env.VITE_SERVER_PORT)
+		: 3000;
 
 const app = express();
 app.use(cors());
+app.use(express.static(distDir));
+// models/ lives outside dist, so serve it explicitly for the browser/worker fetches.
+app.use("/models", express.static(path.join(__dirname, "models")));
 
 // Same signing logic as generateToken.ts, exposed over HTTP instead of the CLI.
 function generateSignature(
@@ -63,6 +76,11 @@ app.get("/zoomtoken", (req, res) => {
 
 	const token = generateSignature(sessionName, role, expiresInHours);
 	res.json({ token });
+});
+
+// SPA fallback so client-side routes (and the root path) resolve to the built app.
+app.get(/^(?!\/zoomtoken).*/, (_req, res) => {
+	res.sendFile(path.join(distDir, "index.html"));
 });
 
 app.listen(port, () => {

@@ -2,8 +2,8 @@ services:
   - type: web
     name: Zoom Sentiment Analysis with Live Transcription
     runtime: node
-    buildCommand: npm install
-    startCommand: npm run start
+    buildCommand: npm install && npm run build
+    startCommand: npm run server
     repo:  https://github.com/Ticorrian-Heard/sentiment-analysis-LTT
     rootDir: .
     plan: free

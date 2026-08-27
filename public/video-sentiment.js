@@ -20,7 +20,7 @@ class VideoSentimentProcessor extends VideoProcessor {
         const config = {
             warmup: 'none',
             backend: 'webgl',
-            modelBasePath: 'http://localhost:5173/models/',
+            modelBasePath: self.location.origin + '/models/',
             async: false,
             filter: { enabled: true },
             face: { 

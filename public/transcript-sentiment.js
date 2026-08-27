@@ -93,7 +93,7 @@ const trainModel = async (sampleSize, epochs) => {
     console.log(`Please wait. Training the model...`);
 
     //train and save model to browser indexeddb
-    let data = await fetch("http://localhost:5173/models/emotions.tsv").then( r => r.text() );
+    let data = await fetch(self.location.origin + "/models/emotions.tsv").then( r => r.text() );
 
     let lines = data.split( "\n" ).filter( x => !!x ); // Split & remove empty lines
 
