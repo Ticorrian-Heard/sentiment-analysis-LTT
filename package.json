@@ -8,9 +8,8 @@
     "app": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "server": "bun server.ts",
-    "start": "concurrently -p \"[{name}]\" -n \"app,server\" -c \"cyan,green\" \"npm run app\" \"npm run server\""
-  },
+    "server": "bun server.ts"
+    },
   "devDependencies": {
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
