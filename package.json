@@ -5,10 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "app": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
-    "server": "bun server.ts"
+    "server": "bun server.ts",
+    "start": "concurrently -p \"[{name}]\" -n \"app,server\" -c \"cyan,yellow\" \"npm run dev\" \"npm run server\""
     },
   "devDependencies": {
     "@types/cors": "^2.8.17",
