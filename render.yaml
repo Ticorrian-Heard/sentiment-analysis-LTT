@@ -4,15 +4,11 @@ services:
     runtime: node
     buildCommand: npm install && npm run build
     startCommand: npm run server
-    repo:  https://github.com/Ticorrian-Heard/sentiment-analysis-LTT
+    repo:  https://github.com/zoom/zoom-rtms-sentiment-sample
     rootDir: .
     plan: free
     envVars:
       - key: ZOOM_SDK_KEY
         sync: false
       - key: ZOOM_SDK_SECRET
-        sync: false
-      - key: PORT
-        sync: false
-      - key: ENDPOINT_URL
         sync: false
