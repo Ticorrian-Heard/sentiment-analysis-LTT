@@ -12,12 +12,11 @@ const distDir = path.join(__dirname, "dist");
 
 const sdkKey = process.env.ZOOM_SDK_KEY;
 const sdkSecret = process.env.ZOOM_SDK_SECRET;
-// Render (and most hosts) inject PORT; fall back to the local dev var, then a default.
-const port = process.env.PORT
-	? Number(process.env.PORT)
-	: process.env.VITE_SERVER_PORT
-		? Number(process.env.VITE_SERVER_PORT)
-		: 3000;
+// Render (and most hosts) inject PORT; fall back to a default.
+const port = process.env.PORT ? Number(process.env.PORT) : 3000;
+// The public URL the frontend should call for the API. Render sets this automatically;
+// ENDPOINT_URL lets you override it (e.g. for local split frontend/backend dev).
+const endpointUrl = process.env.RENDER_EXTERNAL_URL || process.env.ENDPOINT_URL || null;
 
 const app = express();
 app.use(cors());
@@ -78,8 +77,13 @@ app.get("/zoomtoken", (req, res) => {
 	res.json({ token });
 });
 
+// Lets the browser read server-side .env values at runtime instead of relying on Vite's import.meta.env.
+app.get("/config", (_req, res) => {
+	res.json({ endpointUrl });
+});
+
 // SPA fallback so client-side routes (and the root path) resolve to the built app.
-app.get(/^(?!\/zoomtoken).*/, (_req, res) => {
+app.get(/^(?!\/zoomtoken|\/config).*/, (_req, res) => {
 	res.sendFile(path.join(distDir, "index.html"));
 });
 

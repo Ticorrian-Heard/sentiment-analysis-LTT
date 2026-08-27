@@ -12,7 +12,7 @@ services:
         sync: false
       - key: ZOOM_SDK_SECRET
         sync: false
-      - key: VITE_SERVER_PORT
+      - key: PORT
         sync: false
-      - key: VITE_ENDPOINT_URL
+      - key: ENDPOINT_URL
         sync: false

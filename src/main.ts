@@ -28,13 +28,22 @@ const sentimentOutput = document.getElementById('sentiment') as HTMLElement;
 
 const startCall = async () => {
 
-    const endpointUrl = import.meta.env.VITE_ENDPOINT_URL;
-    const serverPort = import.meta.env.VITE_SERVER_PORT;
+    let endpointUrl: string | null = null;
+    try {
+        const configResponse = await fetch("/config");
+        if (configResponse.ok) {
+            const config = await configResponse.json();
+            endpointUrl = config.endpointUrl ?? null;
+        }
+    } catch (error) {
+        console.error("Failed to retrieve server config:", error);
+    }
+
     let token: string | null = null;
 
     if (endpointUrl) {
         try {
-            const response = await fetch(`${endpointUrl}:${serverPort}/zoomtoken?session=${encodeURIComponent(sessionName)}`);
+            const response = await fetch(`${endpointUrl}/zoomtoken?session=${encodeURIComponent(sessionName)}`);
             if (!response.ok) throw new Error(`Request failed with status ${response.status}`);
             const data = await response.json();
             token = data.token ?? null;
